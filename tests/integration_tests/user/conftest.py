@@ -6,9 +6,11 @@ from starlette import status
 
 from contextlib import nullcontext as does_not_raise
 
+from app.auth.auth_router import bcrypt_context
+from app.auth.model import User
 from app.auth.schema import CreateUser
+from app.backend.db import async_session_maker
 from app.main import app
-from app.queries.user import AsyncUserQueries
 from tests.conftest import API_URL
 
 
@@ -117,8 +119,21 @@ async def users():
             fullname='Admin John'
         ),
     ]
-    res = await AsyncUserQueries.create_users(users)
-    return res
+    new_users: list[User] = []
+    all_new_users_emails: list = []
+    for user_data in users:
+        new_user_data: dict = user_data.model_dump()
+        new_user_data.pop('raw_password')
+        new_user_data['password'] = bcrypt_context.hash(user_data.raw_password)
+        new_user: User = User(**new_user_data)
+        if 'admin' in new_user.fullname.lower():
+            new_user.is_superuser = True
+        new_users.append(new_user)
+        all_new_users_emails.append(user_data.email)
+    async with async_session_maker() as conn:
+        conn.add_all(new_users)
+        await conn.commit()
+    return new_users
 
 
 # @pytest_asyncio.fixture
