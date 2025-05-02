@@ -2,12 +2,15 @@ from email.policy import default
 
 import pytest
 import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy_utils import database_exists, create_database, drop_database
 
 from app.backend.config import settings
 from app.backend.db import sync_engine, Base, async_engine, async_session_maker
+from app.main import app
 
 DEFAULT_DROP_DB_FLAG: str = 'false'
+API_URL: str = 'http://127.0.0.1:8000/api/v1'
 
 # TODO: Can't run more than 1 test in pytest. They fail with RuntimeError. Now idk how to fix it
 
