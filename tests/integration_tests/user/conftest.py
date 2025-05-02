@@ -1,12 +1,15 @@
 from uuid import UUID
 
 import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
 from starlette import status
 
 from contextlib import nullcontext as does_not_raise
 
 from app.auth.schema import CreateUser
+from app.main import app
 from app.queries.user import AsyncUserQueries
+from tests.conftest import API_URL
 
 
 @pytest_asyncio.fixture
@@ -82,6 +85,9 @@ async def users_data_and_status() -> list:
         },
     ]
 
+@pytest_asyncio.fixture
+async def fake_uuid():
+    return '9955edc2-6ac0-402f-9a1e-00d2e28c24cf'
 
 @pytest_asyncio.fixture
 async def users():
@@ -146,3 +152,10 @@ async def mock_get_admin():
         'is_active': True,
         'is_superuser': True
     }
+
+USER_API_URL: str = API_URL + '/users'
+@pytest_asyncio.fixture
+async def async_user_client():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url=USER_API_URL) as client:
+        yield client
