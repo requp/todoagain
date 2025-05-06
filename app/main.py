@@ -3,7 +3,7 @@ from fastapi import FastAPI
 
 from app.auth import user_router, auth_router
 from app.backend.config import ROOT_API
-
+from app.todo.folder import router as folder_router
 
 app = FastAPI()
 app_v1 = FastAPI(
@@ -20,6 +20,7 @@ async def welcome() -> dict:
 
 app.include_router(user_router.router)
 app.include_router(auth_router.router)
+app.include_router(folder_router.router)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8888)
