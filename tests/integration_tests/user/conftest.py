@@ -6,12 +6,15 @@ from starlette import status
 
 from contextlib import nullcontext as does_not_raise
 
-from app.auth.auth_router import bcrypt_context
-from app.auth.model import User
-from app.auth.schema import CreateUser
-from app.backend.db import async_session_maker
 from app.main import app
 from tests.conftest import API_URL
+
+USER_API_URL: str = API_URL + '/users'
+@pytest_asyncio.fixture
+async def async_user_client():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url=USER_API_URL) as client:
+        yield client
 
 
 @pytest_asyncio.fixture
@@ -87,54 +90,6 @@ async def users_data_and_status() -> list:
         },
     ]
 
-@pytest_asyncio.fixture
-async def fake_uuid():
-    return '9955edc2-6ac0-402f-9a1e-00d2e28c24cf'
-
-@pytest_asyncio.fixture
-async def users():
-    users: list = [
-        CreateUser(
-            username='testtest1',
-            email='testtest1@mail.run',
-            raw_password='213213werQ',
-            fullname='User Petrov'
-        ),
-        CreateUser(
-            username='testtest2',
-            email='testtest2@mail.run',
-            fullname='User Igorev',
-            raw_password='213213werQ'
-        ),
-        CreateUser(
-            username='adminadmin',
-            email='adminadmin@mail.run',
-            raw_password='213213werQ',
-            fullname='Admin Smith',
-        ),
-        CreateUser(
-            username='adminadmin2',
-            email='adminadmin2@mail.run',
-            raw_password='213213werQ',
-            fullname='Admin John'
-        ),
-    ]
-    new_users: list[User] = []
-    all_new_users_emails: list = []
-    for user_data in users:
-        new_user_data: dict = user_data.model_dump()
-        new_user_data.pop('raw_password')
-        new_user_data['password'] = bcrypt_context.hash(user_data.raw_password)
-        new_user: User = User(**new_user_data)
-        if 'admin' in new_user.fullname.lower():
-            new_user.is_superuser = True
-        new_users.append(new_user)
-        all_new_users_emails.append(user_data.email)
-    async with async_session_maker() as conn:
-        conn.add_all(new_users)
-        await conn.commit()
-    return new_users
-
 
 # @pytest_asyncio.fixture
 # async def admin_data() -> dict:
@@ -148,6 +103,7 @@ async def users():
 #         conn.add(admin)
 #         await conn.commit()
 #     return ShowUser(**admin.__dict__).model_dump()
+
 
 async def mock_get_user():
     return {
@@ -167,10 +123,3 @@ async def mock_get_admin():
         'is_active': True,
         'is_superuser': True
     }
-
-USER_API_URL: str = API_URL + '/users'
-@pytest_asyncio.fixture
-async def async_user_client():
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url=USER_API_URL) as client:
-        yield client

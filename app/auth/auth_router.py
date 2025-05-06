@@ -26,7 +26,7 @@ async def create_access_token(username: str, user_id: str, is_superuser: bool, e
 
 async def authenticate_user(db: Annotated[AsyncSession, Depends(get_db)], username: str, password: str):
     user = await db.scalar(select(User).where(User.username == username))
-    if not user or not bcrypt_context.verify(password, user.password) or user.is_active == False:
+    if not user or not bcrypt_context.verify(password, str(user.password)) or user.is_active == False:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
@@ -85,7 +85,10 @@ async def login(db: Annotated[AsyncSession, Depends(get_db)], form_data: Annotat
         )
 
     token = await create_access_token(
-        username=user.username, user_id=str(user.id), is_superuser=user.is_superuser, expires_delta=timedelta(minutes=20)
+        username=str(user.username),
+        user_id=str(user.id),
+        is_superuser=bool(user.is_superuser),
+        expires_delta=timedelta(minutes=20)
     )
     return {
         'access_token': token,
