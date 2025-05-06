@@ -53,7 +53,7 @@ async def show_user(
     }
 
 
-@router.put('/{user_id}/update', response_model=dict)
+@router.put('/{user_id}', response_model=dict)
 async def update_user(
         db: Annotated[AsyncSession, Depends(get_db)],
         get_user: Annotated[dict, Depends(get_current_user)],
@@ -79,7 +79,7 @@ async def update_user(
     }
 
 
-@router.delete('/{user_id}/delete', response_model=dict)
+@router.delete('/{user_id}', response_model=dict)
 async def delete_user(
         db: Annotated[AsyncSession, Depends(get_db)],
         get_user: Annotated[dict, Depends(get_current_user)],
