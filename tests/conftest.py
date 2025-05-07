@@ -1,8 +1,7 @@
-from email.policy import default
+import asyncio
 
 import pytest
 import pytest_asyncio
-from httpx import ASGITransport, AsyncClient
 from sqlalchemy_utils import database_exists, create_database, drop_database
 
 from app.backend.config import settings
@@ -12,7 +11,12 @@ from app.main import app
 DEFAULT_DROP_DB_FLAG: str = 'false'
 API_URL: str = 'http://127.0.0.1:8000/api/v1'
 
-# TODO: Can't run more than 1 test in pytest. They fail with RuntimeError. Now idk how to fix it
+
+@pytest.fixture(scope="session")
+def event_loop():
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
 
 # @pytest.fixture(scope='session', autouse=True)
 # def setup_db():
@@ -28,6 +32,7 @@ API_URL: str = 'http://127.0.0.1:8000/api/v1'
 #     if not database_exists(sync_engine.url):
 #         create_database(sync_engine.url)
 
+
 @pytest_asyncio.fixture(scope='function',autouse=True)
 async def async_setup():
     assert settings.MODE == 'TEST'
@@ -37,12 +42,14 @@ async def async_setup():
         await conn.run_sync(Base.metadata.create_all)
     await async_engine.dispose()
 
+
 def pytest_addoption(parser):
     parser.addoption(
         "--drop_db",
         default=DEFAULT_DROP_DB_FLAG,
         choices=('false', 'true')
     )
+
 
 @pytest.fixture(scope='session')
 def does_drop_db(request):
@@ -56,7 +63,6 @@ def drop_db(does_drop_db):
         assert settings.MODE == 'TEST'
         if database_exists(sync_engine.url):
             drop_database(sync_engine.url)
-
 
 
 @pytest_asyncio.fixture

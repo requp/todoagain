@@ -11,20 +11,6 @@ FOLDER_API_URL: str = API_URL + '/folders'
 TASK_API_URL: str = API_URL + '/tasks'
 
 @pytest_asyncio.fixture
-async def async_folder_client():
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url=FOLDER_API_URL) as client:
-        yield client
-
-
-@pytest_asyncio.fixture
-async def async_task_client():
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url=TASK_API_URL) as client:
-        yield client
-
-
-@pytest_asyncio.fixture
 async def folders(users, db_test):
     user: User = users[0]
     admin: User = users[-1]
@@ -77,3 +63,63 @@ async def folders(users, db_test):
 
     folders.extend(nested_nested_folders)
     return folders
+
+
+@pytest_asyncio.fixture
+async def user_folder(folders):
+    return folders[0]
+
+
+@pytest_asyncio.fixture
+async def user_folder_url(user_folder):
+    return f'/{user_folder.id}'
+
+
+@pytest_asyncio.fixture
+async def user_nested_folder(folders):
+    return folders[2]
+
+
+@pytest_asyncio.fixture
+async def user_nested_folder_url(user_nested_folder):
+    return f'/{user_nested_folder.id}'
+
+
+@pytest_asyncio.fixture
+async def user_nested_nested_folder(folders):
+    return folders[4]
+
+
+@pytest_asyncio.fixture
+async def user_nested_nested_folder_url(user_nested_nested_folder):
+    return f'/{user_nested_nested_folder.id}'
+
+
+@pytest_asyncio.fixture
+async def admin_folder(folders):
+    return folders[1]
+
+
+@pytest_asyncio.fixture
+async def admin_folder_url(admin_folder):
+    return f'/{admin_folder.id}'
+
+
+@pytest_asyncio.fixture
+async def admin_nested_folder(folders):
+    return folders[3]
+
+
+@pytest_asyncio.fixture
+async def admin_nested_folder_url(admin_nested_folder):
+    return f'/{admin_nested_folder.id}'
+
+
+@pytest_asyncio.fixture
+async def admin_nested_nested_folder(folders):
+    return folders[5]
+
+
+@pytest_asyncio.fixture
+async def admin_nested_nested_folder_url(admin_nested_nested_folder):
+    return f'/{admin_nested_nested_folder.id}'

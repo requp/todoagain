@@ -1,7 +1,6 @@
-from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import String, Boolean, Text, DateTime, ForeignKey
+from sqlalchemy import String, Boolean, Text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.backend.db import Base
@@ -20,7 +19,7 @@ class Folder(IDMixin, TimestampsMixin, Base):
         ForeignKey(column='users.id', ondelete='CASCADE')
     )
     parent_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey('folders.id'), nullable=True
+        ForeignKey(column='folders.id', ondelete='CASCADE'), nullable=True
     )
 
 
