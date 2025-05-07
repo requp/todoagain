@@ -2,8 +2,10 @@ import asyncio
 
 import pytest
 import pytest_asyncio
+from pygments.styles.dracula import yellow
 from sqlalchemy_utils import database_exists, create_database, drop_database
 
+from app.auth.auth_router import get_current_user
 from app.backend.config import settings
 from app.backend.db import sync_engine, Base, async_engine, async_session_maker
 from app.main import app
@@ -69,3 +71,9 @@ def drop_db(does_drop_db):
 async def db_test():
     async with async_session_maker() as conn:
         yield conn
+
+
+@pytest.fixture(autouse=True, scope='function')
+def drop_get_current_db():
+    yield
+    app.dependency_overrides.clear()
