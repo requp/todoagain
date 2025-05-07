@@ -135,3 +135,4 @@ class FolderManager:
         )
         FolderExceptionManager.delete_folder_exceptions(folder, get_user)
         await db.delete(folder)
+        await db.commit()
