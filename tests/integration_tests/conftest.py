@@ -1,12 +1,13 @@
 import pytest
 import pytest_asyncio
 
-from app.auth.auth_router import bcrypt_context
+from app.auth.auth_router import bcrypt_context, get_current_user
 from app.auth.model import User
+from app.main import app
 
 
 @pytest_asyncio.fixture
-async def users(db_test):
+async def users(db_test) -> list[User]:
     password: str = bcrypt_context.hash('213213werQ')
     users: list = [
         User(
@@ -42,19 +43,23 @@ async def users(db_test):
 
 
 @pytest.fixture
-def fake_uuid():
+def fake_uuid() -> str:
     return '9955edc2-6ac0-402f-9a1e-00d2e28c24cf'
 
 
 @pytest_asyncio.fixture
-async def user_1(users):
+async def user_1(users) -> User:
     return users[0]
 
 
 @pytest_asyncio.fixture
-async def mock_get_current_user_1(user_1):
+async def user_1_url(user_1) -> str:
+    return f'/{user_1}'
 
-    return lambda :{
+
+@pytest_asyncio.fixture
+async def mock_get_current_user_1(user_1) -> None:
+    app.dependency_overrides[get_current_user] = lambda :{
         'id': str(user_1.id),
         'username': user_1.username,
         'is_superuser': user_1.is_superuser
@@ -62,29 +67,38 @@ async def mock_get_current_user_1(user_1):
 
 
 @pytest_asyncio.fixture
-async def user_2(users):
+async def user_2(users) -> User:
     return users[1]
 
 
 @pytest_asyncio.fixture
-async def mock_get_current_user_2(user_2):
+async def user_2_url(user_2) -> str:
+    return f'/{user_2}'
 
-    return lambda :{
+
+@pytest_asyncio.fixture
+async def mock_get_current_user_2(user_2):
+    app.dependency_overrides[get_current_user] = lambda: {
         'id': str(user_2.id),
         'username': user_2.username,
         'is_superuser': user_2.is_superuser
     }
 
 
+
 @pytest_asyncio.fixture
-async def admin_1(users):
+async def admin_1(users) -> User:
     return users[2]
 
 
 @pytest_asyncio.fixture
-async def mock_get_current_admin_1(admin_1):
+async def admin_1_url(admin_1) -> str:
+    return f'/{admin_1}'
 
-    return lambda :{
+
+@pytest_asyncio.fixture
+async def mock_get_current_admin_1(admin_1):
+    app.dependency_overrides[get_current_user] = lambda: {
         'id': str(admin_1.id),
         'username': admin_1.username,
         'is_superuser': admin_1.is_superuser
@@ -92,14 +106,18 @@ async def mock_get_current_admin_1(admin_1):
 
 
 @pytest_asyncio.fixture
-async def admin_2(users):
+async def admin_2(users) -> User:
     return users[3]
 
 
 @pytest_asyncio.fixture
-async def mock_get_current_admin_2(admin_2):
+async def admin_2_url(admin_2) -> str:
+    return f'/{admin_2}'
 
-    return lambda :{
+
+@pytest_asyncio.fixture
+async def mock_get_current_admin_2(admin_2):
+    app.dependency_overrides[get_current_user] = lambda: {
         'id': str(admin_2.id),
         'username': admin_2.username,
         'is_superuser': admin_2.is_superuser
