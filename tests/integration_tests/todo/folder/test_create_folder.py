@@ -37,7 +37,7 @@ class TestCreateFolder:
             folders: list[Folder]
     ):
         """Test response with a positive test case"""
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
+
         response = await async_folder_client.post(url='/', json=folder_data)
         assert response.status_code == status.HTTP_201_CREATED
         json_data: dict = response.json()
@@ -67,7 +67,6 @@ class TestCreateFolder:
 
         # Create a naster folder with paren_id as new_folder by user_1 with success
         nested_folder_data['parent_id'] = str(new_folder.id)
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
         response = await async_folder_client.post(url='/', json=nested_folder_data)
         assert response.status_code == status.HTTP_201_CREATED
         assert response.json()['detail'] == 'Successful'
@@ -93,7 +92,6 @@ class TestCreateFolder:
         await db_test.commit()
 
         # Trying to create a folder with the same text as name by the same user_1
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
         response = await async_folder_client.post(url='/', json=folder_data)
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert response.json()['detail'] == "You can't create a folder with the same name which you already have"
@@ -119,7 +117,6 @@ class TestCreateFolder:
         await db_test.commit()
 
         # Create a folder with the same text as name but by user_2 with success
-        app.dependency_overrides[get_current_user] = mock_get_current_user_2
         response = await async_folder_client.post(url='/', json=folder_data)
         assert response.status_code == status.HTTP_201_CREATED
         assert response.json()['detail'] == 'Successful'
@@ -147,7 +144,6 @@ class TestCreateFolder:
 
         # Trying to create a folder for user_2 with user_1 folder id as a parent
         nested_folder_data['parent_id'] = str(new_folder.id)
-        app.dependency_overrides[get_current_user] = mock_get_current_user_2
         response = await async_folder_client.post(url='/', json=nested_folder_data)
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert response.json()['detail'] == "You can't create a nested folder with the other user's folder"
@@ -166,7 +162,6 @@ class TestCreateFolder:
     ):
         """Test response with a nested folder with no exist id"""
 
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
         nested_folder_data['parent_id'] = fake_uuid
         response = await async_folder_client.post(url='/', json=nested_folder_data)
         assert response.status_code == status.HTTP_404_NOT_FOUND

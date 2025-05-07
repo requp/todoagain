@@ -12,6 +12,22 @@ class TestUpdateFolder:
     """Test a route for updating all user's folders"""
 
     @pytest.mark.asyncio
+    async def test_update_folder_not_exist(
+            self,
+            async_folder_client: AsyncClient,
+            folder_update_data: dict,
+            mock_get_current_user_1,
+            db_test: AsyncSession,
+            fake_uuid: str
+    ) -> None:
+        """Test response with a not exist folder"""
+
+        response = await async_folder_client.put(url=f'/{fake_uuid}', json=folder_update_data)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json()['detail'] == "A folder with given id doesn't exist"
+
+
+    @pytest.mark.asyncio
     async def test_update_folder_not_auth(
             self,
             async_folder_client: AsyncClient,
@@ -26,23 +42,6 @@ class TestUpdateFolder:
 
 
     @pytest.mark.asyncio
-    async def test_update_folder_not_exist(
-            self,
-            async_folder_client: AsyncClient,
-            folder_update_data: dict,
-            mock_get_current_user_1,
-            db_test: AsyncSession,
-            fake_uuid: str
-    ) -> None:
-        """Test response with a not exist folder"""
-
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
-        response = await async_folder_client.put(url=f'/{fake_uuid}', json=folder_update_data)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.json()['detail'] == "A folder with given id doesn't exist"
-
-
-    @pytest.mark.asyncio
     async def test_update_folder_other_user_folder_by_user(
             self,
             async_folder_client: AsyncClient,
@@ -54,7 +53,6 @@ class TestUpdateFolder:
     ) -> None:
         """Test response with not admin rights or not your own account"""
 
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
         response = await async_folder_client.put(url=admin_folder_url, json=folder_update_data)
         assert response.status_code == status.HTTP_403_FORBIDDEN
         json_data: dict = response.json()
@@ -76,7 +74,6 @@ class TestUpdateFolder:
         """Test response with positive case of admin account on user"""
 
         assert user_folder.description != folder_update_data['description']
-        app.dependency_overrides[get_current_user] = mock_get_current_admin_1
         response = await async_folder_client.put(url=user_folder_url, json=folder_update_data)
         assert response.status_code == status.HTTP_200_OK
         assert response.json()['detail'] == 'Folder has been successfully updated'
@@ -101,7 +98,6 @@ class TestUpdateFolder:
         assert user_nested_nested_folder.parent_id == user_nested_folder.id
         assert user_nested_nested_folder.name == 'Nested Nested User Folder'
 
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
         new_update_data: dict = {
             'parent_id': str(user_folder.id),
             'name': 'Second nested user folder'
@@ -130,7 +126,6 @@ class TestUpdateFolder:
         """Test response with taken folder's name by user"""
 
         assert user_nested_folder.name != user_folder.name
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
 
         folder_update_data['name'] = user_folder.name
         response = await async_folder_client.put(url=user_nested_folder_url, json=folder_update_data)
@@ -161,7 +156,6 @@ class TestUpdateFolder:
             'name': 'A folder inside of other folder',
             'parent_id': str(admin_folder.id)
         }
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
         response = await async_folder_client.put(url=user_nested_nested_folder_url, json=nested_folder_data)
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert response.json()['detail'] == "You can't update a nested folder with the other user's folder"

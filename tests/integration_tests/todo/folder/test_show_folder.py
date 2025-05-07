@@ -36,7 +36,6 @@ class TestShowFolder:
     ) -> None:
         """Test response with a positive test case"""
 
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
         response = await async_folder_client.get(url=user_folder_url)
         assert response.status_code == status.HTTP_200_OK
         json_data: dict = response.json()
@@ -58,7 +57,6 @@ class TestShowFolder:
         with admin with user's private folder
         """
         assert user_folder.is_private
-        app.dependency_overrides[get_current_user] = mock_get_current_admin_1
         response = await async_folder_client.get(url=user_folder_url)
         assert response.status_code == status.HTTP_200_OK
         json_data: dict = response.json()
@@ -79,7 +77,6 @@ class TestShowFolder:
         Test response with a user trying to see other user's private folder
         """
         assert admin_folder.is_private
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
         response = await async_folder_client.get(url=admin_folder_url)
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert response.json()['detail'] == "You can't see a private folder of other user"
@@ -97,7 +94,6 @@ class TestShowFolder:
         Test response with not exist folder
         """
 
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
         response = await async_folder_client.get(url=f'/{fake_uuid}')
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json()['detail'] == "A folder with given id doesn't exist"

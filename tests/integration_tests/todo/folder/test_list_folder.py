@@ -8,7 +8,7 @@ from app.main import app
 from app.todo.folder.model import Folder
 
 
-class TestShowFolder:
+class TestListFolder:
     """Test a route for listing all user's folders"""
 
     @pytest.mark.asyncio
@@ -31,7 +31,6 @@ class TestShowFolder:
     ) -> None:
         """Test response with a positive test case"""
 
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
         response = await async_folder_client.get(url='/')
         assert response.status_code == status.HTTP_200_OK
         json_data: dict = response.json()

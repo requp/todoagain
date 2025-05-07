@@ -35,7 +35,6 @@ class TestDeleteFolder:
     ) -> None:
         """Test response with a not exist folder"""
 
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
         response = await async_folder_client.delete(url=f'/{fake_uuid}')
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json()['detail'] == "A folder with given id doesn't exist"
@@ -52,7 +51,6 @@ class TestDeleteFolder:
     ) -> None:
         """Test response with not admin rights or not your own account"""
 
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
         response = await async_folder_client.delete(url=admin_folder_url)
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert response.json()['detail'] == "You don't have admin permission"
@@ -72,7 +70,6 @@ class TestDeleteFolder:
     ) -> None:
         """Test response with a positive test case"""
 
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
         response = await async_folder_client.delete(url=user_nested_nested_folder_url)
         assert response.status_code == status.HTTP_200_OK
         assert response.json()['detail'] == 'Folder has been successfully deleted'
@@ -94,7 +91,6 @@ class TestDeleteFolder:
         other user's folder by admin
         """
 
-        app.dependency_overrides[get_current_user] = mock_get_current_admin_1
         response = await async_folder_client.delete(url=user_nested_nested_folder_url)
         assert response.status_code == status.HTTP_200_OK
         assert response.json()['detail'] == 'Folder has been successfully deleted'
@@ -118,7 +114,6 @@ class TestDeleteFolder:
         )
         assert len(all_user_folders) == 3
 
-        app.dependency_overrides[get_current_user] = mock_get_current_user_1
         response = await async_folder_client.delete(url=user_folder_url)
         assert response.status_code == status.HTTP_200_OK
         assert response.json()['detail'] == 'Folder has been successfully deleted'
