@@ -17,9 +17,9 @@ class TestListFolder:
     ) -> None:
         """Test response with not auth data"""
 
-        response = await async_folder_client.get(url='/')
+        response = await async_folder_client.get(url="/")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
-        assert response.json()['detail'] == 'Not authenticated'
+        assert response.json()["detail"] == "Not authenticated"
 
 
     @pytest.mark.asyncio
@@ -31,9 +31,9 @@ class TestListFolder:
     ) -> None:
         """Test response with a positive test case"""
 
-        response = await async_folder_client.get(url='/')
+        response = await async_folder_client.get(url="/")
         assert response.status_code == status.HTTP_200_OK
         json_data: dict = response.json()
-        assert json_data['detail'] == 'Successful'
-        assert isinstance(json_data['data'], list)
-        assert len(json_data['data']) == 3
+        assert json_data["detail"] == "Successful"
+        assert isinstance(json_data["data"], list)
+        assert len(json_data["data"]) == 3

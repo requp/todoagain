@@ -22,7 +22,7 @@ class TestShowFolder:
 
         response = await async_folder_client.get(url=user_folder_url)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
-        assert response.json()['detail'] == 'Not authenticated'
+        assert response.json()["detail"] == "Not authenticated"
 
 
     @pytest.mark.asyncio
@@ -39,8 +39,8 @@ class TestShowFolder:
         response = await async_folder_client.get(url=user_folder_url)
         assert response.status_code == status.HTTP_200_OK
         json_data: dict = response.json()
-        assert json_data['detail'] == 'Successful'
-        assert json_data['data']['id'] == str(user_folder.id)
+        assert json_data["detail"] == "Successful"
+        assert json_data["data"]["id"] == str(user_folder.id)
 
 
     @pytest.mark.asyncio
@@ -60,8 +60,8 @@ class TestShowFolder:
         response = await async_folder_client.get(url=user_folder_url)
         assert response.status_code == status.HTTP_200_OK
         json_data: dict = response.json()
-        assert json_data['detail'] == 'Successful'
-        assert json_data['data']['id'] == str(user_folder.id)
+        assert json_data["detail"] == "Successful"
+        assert json_data["data"]["id"] == str(user_folder.id)
 
 
     @pytest.mark.asyncio
@@ -79,7 +79,7 @@ class TestShowFolder:
         assert admin_folder.is_private
         response = await async_folder_client.get(url=admin_folder_url)
         assert response.status_code == status.HTTP_403_FORBIDDEN
-        assert response.json()['detail'] == "You can't see a private folder of other user"
+        assert response.json()["detail"] == "You can't see a private folder of other user"
 
 
     @pytest.mark.asyncio
@@ -94,6 +94,6 @@ class TestShowFolder:
         Test response with not exist folder
         """
 
-        response = await async_folder_client.get(url=f'/{fake_uuid}')
+        response = await async_folder_client.get(url=f"/{fake_uuid}")
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.json()['detail'] == "A folder with given id doesn't exist"
+        assert response.json()["detail"] == "A folder with given id doesn't exist"

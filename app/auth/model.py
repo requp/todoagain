@@ -8,8 +8,8 @@ from app.mixins.model_mixins.timestamps_mixins import TimestampsMixin
 
 
 class UserRoles(enum.Enum):
-    admin = 'admin'
-    user = 'user'
+    admin = "admin"
+    user = "user"
 
 class User(IDMixin, TimestampsMixin, Base):
     __tablename__ = "users"

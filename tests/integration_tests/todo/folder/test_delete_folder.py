@@ -23,7 +23,7 @@ class TestDeleteFolder:
 
         response = await async_folder_client.delete(url=user_folder_url)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
-        assert response.json()['detail'] == 'Not authenticated'
+        assert response.json()["detail"] == "Not authenticated"
 
 
     @pytest.mark.asyncio
@@ -35,9 +35,9 @@ class TestDeleteFolder:
     ) -> None:
         """Test response with a not exist folder"""
 
-        response = await async_folder_client.delete(url=f'/{fake_uuid}')
+        response = await async_folder_client.delete(url=f"/{fake_uuid}")
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.json()['detail'] == "A folder with given id doesn't exist"
+        assert response.json()["detail"] == "A folder with given id doesn't exist"
 
 
     @pytest.mark.asyncio
@@ -53,7 +53,7 @@ class TestDeleteFolder:
 
         response = await async_folder_client.delete(url=admin_folder_url)
         assert response.status_code == status.HTTP_403_FORBIDDEN
-        assert response.json()['detail'] == "You don't have admin permission"
+        assert response.json()["detail"] == "You don't have admin permission"
         assert await db_test.scalar(
             select(Folder).filter_by(id=admin_folder.id)
         )
@@ -72,7 +72,7 @@ class TestDeleteFolder:
 
         response = await async_folder_client.delete(url=user_nested_nested_folder_url)
         assert response.status_code == status.HTTP_200_OK
-        assert response.json()['detail'] == 'Folder has been successfully deleted'
+        assert response.json()["detail"] == "Folder has been successfully deleted"
 
         assert await db_test.scalar(select(Folder).filter_by(id=user_nested_nested_folder.id)) is None
 
@@ -93,7 +93,7 @@ class TestDeleteFolder:
 
         response = await async_folder_client.delete(url=user_nested_nested_folder_url)
         assert response.status_code == status.HTTP_200_OK
-        assert response.json()['detail'] == 'Folder has been successfully deleted'
+        assert response.json()["detail"] == "Folder has been successfully deleted"
 
         assert await db_test.scalar(select(Folder).filter_by(id=user_nested_nested_folder.id)) is None
 
@@ -116,7 +116,7 @@ class TestDeleteFolder:
 
         response = await async_folder_client.delete(url=user_folder_url)
         assert response.status_code == status.HTTP_200_OK
-        assert response.json()['detail'] == 'Folder has been successfully deleted'
+        assert response.json()["detail"] == "Folder has been successfully deleted"
 
         all_user_folders = list(
             await db_test.scalars(select(Folder).filter_by(user_id=user_1.id))

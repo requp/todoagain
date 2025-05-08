@@ -7,34 +7,33 @@ from app.main import app
 from app.todo.folder.model import Folder
 from tests.conftest import API_URL
 
-FOLDER_API_URL: str = API_URL + '/folders'
-TASK_API_URL: str = API_URL + '/tasks'
+TASK_API_URL: str = API_URL + "/tasks"
 
 @pytest_asyncio.fixture
-async def folders(users, db_test):
+async def folders(users, db_test) -> list[Folder]:
     user: User = users[0]
     admin: User = users[-1]
 
-    folders = [
+    folders: list[Folder] = [
         Folder(
-            name='Test User Folder',
+            name="Test User Folder",
             user_id=user.id,
         ),
         Folder(
-            name='Test Admin Folder',
+            name="Test Admin Folder",
             user_id=admin.id,
         ),
     ]
     db_test.add_all(folders)
     await db_test.commit()
-    nested_folders: list = [
+    nested_folders: list[Folder] = [
         Folder(
-            name='Nested User Folder',
+            name="Nested User Folder",
             user_id=user.id,
             parent_id=folders[0].id
         ),
         Folder(
-            name='Nested Admin Folder',
+            name="Nested Admin Folder",
             user_id=admin.id,
             parent_id=folders[1].id
         )
@@ -46,14 +45,14 @@ async def folders(users, db_test):
 
     db_test.add_all(folders)
     await db_test.commit()
-    nested_nested_folders: list = [
+    nested_nested_folders: list[Folder] = [
         Folder(
-            name='Nested Nested User Folder',
+            name="Nested Nested User Folder",
             user_id=user.id,
             parent_id=folders[2].id
         ),
         Folder(
-            name='Nested Nested Admin Folder',
+            name="Nested Nested Admin Folder",
             user_id=admin.id,
             parent_id=folders[3].id
         )
@@ -66,60 +65,60 @@ async def folders(users, db_test):
 
 
 @pytest_asyncio.fixture
-async def user_folder(folders):
+async def user_folder(folders) -> Folder:
     return folders[0]
 
 
 @pytest_asyncio.fixture
-async def user_folder_url(user_folder):
-    return f'/{user_folder.id}'
+async def user_folder_url(user_folder) -> str:
+    return f"/{user_folder.id}"
 
 
 @pytest_asyncio.fixture
-async def user_nested_folder(folders):
+async def user_nested_folder(folders) -> Folder:
     return folders[2]
 
 
 @pytest_asyncio.fixture
-async def user_nested_folder_url(user_nested_folder):
-    return f'/{user_nested_folder.id}'
+async def user_nested_folder_url(user_nested_folder) -> str:
+    return f"/{user_nested_folder.id}"
 
 
 @pytest_asyncio.fixture
-async def user_nested_nested_folder(folders):
+async def user_nested_nested_folder(folders) -> Folder:
     return folders[4]
 
 
 @pytest_asyncio.fixture
-async def user_nested_nested_folder_url(user_nested_nested_folder):
-    return f'/{user_nested_nested_folder.id}'
+async def user_nested_nested_folder_url(user_nested_nested_folder) -> str:
+    return f"/{user_nested_nested_folder.id}"
 
 
 @pytest_asyncio.fixture
-async def admin_folder(folders):
+async def admin_folder(folders) -> Folder:
     return folders[1]
 
 
 @pytest_asyncio.fixture
-async def admin_folder_url(admin_folder):
-    return f'/{admin_folder.id}'
+async def admin_folder_url(admin_folder) -> str:
+    return f"/{admin_folder.id}"
 
 
 @pytest_asyncio.fixture
-async def admin_nested_folder(folders):
+async def admin_nested_folder(folders) -> Folder:
     return folders[3]
 
 
 @pytest_asyncio.fixture
-async def admin_nested_folder_url(admin_nested_folder):
-    return f'/{admin_nested_folder.id}'
+async def admin_nested_folder_url(admin_nested_folder) -> str:
+    return f"/{admin_nested_folder.id}"
 
 
 @pytest_asyncio.fixture
-async def admin_nested_nested_folder(folders):
+async def admin_nested_nested_folder(folders) -> Folder:
     return folders[5]
 
 
 @pytest_asyncio.fixture
-async def admin_nested_nested_folder_url(admin_nested_nested_folder):
-    return f'/{admin_nested_nested_folder.id}'
+async def admin_nested_nested_folder_url(admin_nested_nested_folder) -> str:
+    return f"/{admin_nested_nested_folder.id}"

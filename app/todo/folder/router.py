@@ -11,9 +11,9 @@ from app.backend.db_depends import get_db
 from app.todo.folder.schema import CreateFolder, UpdateFolder
 from app.todo.folder.service import FolderManager
 
-router = APIRouter(prefix=ROOT_API + '/folders', tags=['folders'])
+router = APIRouter(prefix=ROOT_API + "/folders", tags=["folders"])
 
-@router.post(path='/', status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post(path="/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def create_folder(
         db: Annotated[AsyncSession, Depends(get_db)],
         get_user: Annotated[dict, Depends(get_current_user)],
@@ -29,13 +29,13 @@ async def create_folder(
     """
     folder_data: dict = await FolderManager.create_folder(db=db, get_user=get_user, folder_data=new_folder)
     return {
-        'data': folder_data,
-        'status_code': status.HTTP_201_CREATED,
-        'detail': 'Successful'
+        "data": folder_data,
+        "status_code": status.HTTP_201_CREATED,
+        "detail": "Successful"
     }
 
 
-@router.get(path='/{folder_id}', response_model=dict)
+@router.get(path="/{folder_id}", response_model=dict)
 async def show_folder(
         db: Annotated[AsyncSession, Depends(get_db)],
         get_user: Annotated[dict, Depends(get_current_user)],
@@ -51,13 +51,13 @@ async def show_folder(
     """
     folder_data: dict = await FolderManager.show_folder(db=db, get_user=get_user, folder_id=folder_id)
     return {
-        'data': folder_data,
-        'status_code': status.HTTP_200_OK,
-        'detail': 'Successful'
+        "data": folder_data,
+        "status_code": status.HTTP_200_OK,
+        "detail": "Successful"
     }
 
 
-@router.get(path='/', response_model=dict)
+@router.get(path="/", response_model=dict)
 async def list_folders(
         db: Annotated[AsyncSession, Depends(get_db)],
         get_user: Annotated[dict, Depends(get_current_user)],
@@ -71,13 +71,13 @@ async def list_folders(
     """
     folders_data: list[dict] = await FolderManager.list_folders(db=db, get_user=get_user)
     return {
-        'data': folders_data,
-        'status_code': status.HTTP_200_OK,
-        'detail': 'Successful'
+        "data": folders_data,
+        "status_code": status.HTTP_200_OK,
+        "detail": "Successful"
     }
 
 
-@router.put(path='/{folder_id}', response_model=dict)
+@router.put(path="/{folder_id}", response_model=dict)
 async def update_folder(
         db: Annotated[AsyncSession, Depends(get_db)],
         get_user: Annotated[dict, Depends(get_current_user)],
@@ -97,13 +97,13 @@ async def update_folder(
         db=db, get_user=get_user, folder_id=folder_id, updated_data=updated_data
     )
     return {
-        'data': folder_data,
-        'status_code': status.HTTP_200_OK,
-        'detail': 'Folder has been successfully updated'
+        "data": folder_data,
+        "status_code": status.HTTP_200_OK,
+        "detail": "Folder has been successfully updated"
     }
 
 
-@router.delete(path='/{folder_id}', response_model=dict)
+@router.delete(path="/{folder_id}", response_model=dict)
 async def delete_folder(
         db: Annotated[AsyncSession, Depends(get_db)],
         get_user: Annotated[dict, Depends(get_current_user)],
@@ -121,6 +121,6 @@ async def delete_folder(
         db=db, get_user=get_user, folder_id=folder_id
     )
     return {
-        'status_code': status.HTTP_200_OK,
-        'detail': 'Folder has been successfully deleted'
+        "status_code": status.HTTP_200_OK,
+        "detail": "Folder has been successfully deleted"
     }
