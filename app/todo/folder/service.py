@@ -40,7 +40,7 @@ class FolderManager:
         )
         new_folder: Folder = Folder(
             **folder_data.model_dump(),
-            user_id=get_user['id']
+            user_id=get_user["id"]
         )
         db.add(new_folder)
         await db.commit()
@@ -69,7 +69,7 @@ class FolderManager:
         folders: list[Folder] | None = list(
             await db.scalars(
                 select(Folder)
-                .filter_by(user_id=get_user['id'])
+                .filter_by(user_id=get_user["id"])
             )
         )
         folders_list: list[dict] = []

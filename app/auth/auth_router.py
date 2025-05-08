@@ -11,21 +11,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 
-router = APIRouter(prefix='/auth', tags=['auth'])
-bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+router = APIRouter(prefix="/auth", tags=["auth"])
+bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
-async def create_access_token(username: str, user_id: str, is_superuser: bool, expires_delta: timedelta):
-    encode = {'sub': username, 'id': user_id, 'is_superuser': is_superuser}
+async def create_access_token(username: str, user_id: str, is_superuser: bool, expires_delta: timedelta) -> str:
+    encode = {"sub": username, "id": user_id, "is_superuser": is_superuser}
     expires = datetime.now() + expires_delta
-    encode.update({'exp': expires})
+    encode.update({"exp": expires})
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-async def authenticate_user(db: Annotated[AsyncSession, Depends(get_db)], username: str, password: str):
-    user = await db.scalar(select(User).where(User.username == username))
+async def authenticate_user(db: Annotated[AsyncSession, Depends(get_db)], username: str, password: str) -> User:
+    user: User | None = await db.scalar(
+        select(User).where(User.username == username)
+    )
     if not user or not bcrypt_context.verify(password, str(user.password)) or user.is_active == False:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -40,17 +42,17 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 from jose import jwt, JWTError
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> dict:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get('sub')
-        user_id: int = payload.get('id')
-        is_admin: bool = payload.get('is_superuser')
-        expire = payload.get('exp')
+        username: str = payload.get("sub")
+        user_id: int = payload.get("id")
+        is_admin: bool = payload.get("is_superuser")
+        expire = payload.get("exp")
         if username is None or user_id is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail='Could not validate user'
+                detail="Could not validate user"
             )
         if expire is None:
             raise HTTPException(
@@ -64,24 +66,27 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
             )
 
         return {
-            'username': username,
-            'id': user_id,
-            'is_superuser': is_admin,
+            "username": username,
+            "id": user_id,
+            "is_superuser": is_admin,
         }
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Could not validate user'
+            detail="Could not validate user"
         )
 
-@router.post('/token')
-async def login(db: Annotated[AsyncSession, Depends(get_db)], form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+@router.post("/token")
+async def login(
+        db: Annotated[AsyncSession, Depends(get_db)],
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+) -> dict:
     user = await authenticate_user(db, form_data.username, form_data.password)
 
     if not user or user.is_active == False:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Could not validate user'
+            detail="Could not validate user"
         )
 
     token = await create_access_token(
@@ -91,7 +96,7 @@ async def login(db: Annotated[AsyncSession, Depends(get_db)], form_data: Annotat
         expires_delta=timedelta(minutes=20)
     )
     return {
-        'access_token': token,
-        'token_type': 'bearer'
+        "access_token": token,
+        "token_type": "bearer"
     }
 
