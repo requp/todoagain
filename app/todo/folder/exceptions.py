@@ -5,6 +5,7 @@ from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
+from app.auth.exceptions import user_have_no_admin_permissions
 from app.todo.folder.model import Folder
 from app.todo.folder.schema import CreateFolder, UpdateFolder
 
@@ -46,23 +47,14 @@ def folder_not_exist(folder: Folder | None) -> None:
         )
 
 
-def user_have_no_admin_permissions(folder: Folder, get_user: dict) -> None:
-    if str(folder.user_id) != get_user['id']:
-        if not get_user['is_superuser']:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You don't have admin permission"
-            )
-
-
 async def name_is_taken_by_user(
         db: AsyncSession,
         folder_data: CreateFolder | UpdateFolder,
         get_user: dict,
-        action_name: str = 'create'
+        action_name: str = "create"
 ):
     is_name_taken_by_user: bool = await _is_name_taken_by_user_id(
-        db=db, folder_name=folder_data.name, user_id=get_user['id']
+        db=db, folder_name=folder_data.name, user_id=get_user["id"]
     )
     if is_name_taken_by_user:
         raise HTTPException(
@@ -76,11 +68,11 @@ async def other_user_parent_folder(
         db: AsyncSession,
         get_user: dict,
         folder_data: CreateFolder | UpdateFolder,
-        action_name: str = 'create'
+        action_name: str = "create"
 ) -> None:
     if folder_data.parent_id:
         is_users_parent_folder: bool = await _is_users_parent_folder(
-            db=db, user_id=get_user['id'], parent_id=folder_data.parent_id
+            db=db, user_id=get_user["id"], parent_id=folder_data.parent_id
         )
         if not is_users_parent_folder:
             raise HTTPException(
@@ -92,9 +84,9 @@ async def other_user_parent_folder(
 
 def private_folder(folder: Folder, get_user: dict) -> None:
     if (
-            not get_user['is_superuser']
+            not get_user["is_superuser"]
             and folder.is_private
-            and str(folder.user_id) != get_user['id']
+            and str(folder.user_id) != get_user["id"]
     ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -137,13 +129,15 @@ class FolderExceptionManager:
             db: AsyncSession
     ) -> None:
         folder_not_exist(folder=folder)
-        user_have_no_admin_permissions(folder=folder, get_user=get_user)
+        user_have_no_admin_permissions(
+            get_user=get_user, user_id=str(folder.user_id)
+        )
         if updated_data.name and updated_data.name != folder.name:
             await name_is_taken_by_user(
-                folder_data=updated_data, db=db, get_user=get_user, action_name='update'
+                folder_data=updated_data, db=db, get_user=get_user, action_name="update"
             )
         await other_user_parent_folder(
-            db=db, folder_data=updated_data, get_user=get_user, action_name='update'
+            db=db, folder_data=updated_data, get_user=get_user, action_name="update"
         )
 
 
@@ -152,4 +146,6 @@ class FolderExceptionManager:
             folder: Folder | None, get_user: dict
     ) -> None:
         folder_not_exist(folder=folder)
-        user_have_no_admin_permissions(folder=folder, get_user=get_user)
+        user_have_no_admin_permissions(
+            get_user=get_user, user_id=str(folder.user_id)
+        )

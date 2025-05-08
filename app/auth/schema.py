@@ -14,8 +14,11 @@ class UpdateUserPassword(BaseModel):
 class UpdateUserEmail(BaseModel):
     email: Annotated[EmailStr, Field(max_length=300)]
 
-class CreateUser(BaseUser):
+class CreateUserRaw(BaseUser):
     raw_password: Annotated[str, Field(min_length=8, max_length=32)]
+
+class CreateUser(BaseUser):
+    password: str
 
 class ShowUser(BaseUser):
     id: Annotated[UUID, Field()]
